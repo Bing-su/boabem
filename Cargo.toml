@@ -14,4 +14,18 @@ name = "boabem"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "<1"
+pyo3 = { version = "<1", features = [
+    "extension-module",
+    "generate-import-lib",
+    "eyre",
+] }
+boa_engine = { version = "0.20.0", features = ["deser", "flowgraph", "trace"] }
+boa_runtime = "0.20.0"
+pythonize = "0.25"
+eyre = "0.6"
+serde_json = "1"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

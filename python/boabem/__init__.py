@@ -1,6 +1,3 @@
-from .boabem import *
+from .boabem import Context, __version__
 
-
-__doc__ = boabem.__doc__
-if hasattr(boabem, "__all__"):
-    __all__ = boabem.__all__
+__all__ = ["Context", "__version__"]
