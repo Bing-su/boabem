@@ -1,0 +1,29 @@
+
+[project]
+name = "boabem"
+description = "Python binding of rust crate 'boa', embeddable javascript engine"
+authors = [{ name = "Dowon", email = "ks2515@naver.com" }]
+requires-python = ">=3.9"
+license = "MIT or Apache-2.0"
+readme = "README.md"
+keywords = ["javascript"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: JavaScript",
+]
+dynamic = ["version"]
+
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+source = "https://github.com/Bing-su/boabem"
+
+[tool.maturin]
+python-source = "python"
+features = ["pyo3/extension-module"]
+
+[build-system]
+requires = ["maturin>=1.9,<2.0"]
+build-backend = "maturin"

@@ -1,0 +1,17 @@
+[package]
+name = "boabem"
+version = "0.1.0"
+description = "Python binding of rust crate 'boa', embeddable javascript engine"
+edition = "2024"
+authors = ["Dowon <ks2515@naver.com>"]
+readme = "README.md"
+repository = "https://github.com/Bing-su/boabem"
+license = "MIT or Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "boabem"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "<1"
