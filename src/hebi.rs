@@ -57,6 +57,14 @@ impl PyContext {
             JsValue::Undefined => {
                 Python::with_gil(|py| Ok(Py::new(py, PyUndefined::new())?.into_any()))
             }
+            JsValue::BigInt(js_bigint) => {
+                let bigint_str = js_bigint.to_string_radix(10);
+                Python::with_gil(|py| {
+                    let builtins = PyModule::import(py, "builtins")?;
+                    let pyint = builtins.getattr("int")?;
+                    Ok(pyint.call1((bigint_str,))?.into())
+                })
+            }
             other => {
                 let json = other
                     .to_json(&mut self.context)
