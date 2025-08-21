@@ -2,6 +2,7 @@ use boa_engine::{Context, JsValue, Source};
 use eyre::{Result, eyre};
 use pyo3::prelude::*;
 use pythonize::pythonize;
+use std::path::PathBuf;
 
 #[pyclass(name = "Undefined", module = "boabem.boabem", str)]
 #[derive(Debug)]
@@ -14,8 +15,8 @@ impl PyUndefined {
         PyUndefined {}
     }
 
-    fn __repr__(&self) -> String {
-        format!("{:?}", self)
+    fn __repr__(&self) -> &str {
+        "Undefined"
     }
 }
 
@@ -42,7 +43,20 @@ impl PyContext {
     }
 
     pub fn eval(&mut self, source: &str) -> Result<PyObject> {
+        self.eval_from_bytes(source)
+    }
+
+    pub fn eval_from_bytes(&mut self, source: &str) -> Result<PyObject> {
         let source = Source::from_bytes(source);
+        let value: JsValue = self
+            .context
+            .eval(source)
+            .map_err(|e| eyre!(e.to_string()))?;
+        self.jsvalue_to_pyobject(value)
+    }
+
+    pub fn eval_from_filepath(&mut self, path: PathBuf) -> Result<PyObject> {
+        let source = Source::from_filepath(&path)?;
         let value: JsValue = self
             .context
             .eval(source)
