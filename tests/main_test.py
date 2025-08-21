@@ -355,3 +355,9 @@ def test_number_is_integer():
     ctx = Context()
     assert ctx.eval("Number.isInteger(3.0)") is True
     assert ctx.eval("Number.isInteger(3.1)") is False
+
+
+def test_cannot_convert_symbol():
+    ctx = Context()
+    with pytest.raises(RuntimeError, match="TypeError: cannot convert Symbol"):
+        ctx.eval("Symbol('a')")
