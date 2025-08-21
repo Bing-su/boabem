@@ -4,6 +4,7 @@ use pyo3::prelude::*;
 use pythonize::pythonize;
 
 #[pyclass(name = "Undefined", module = "boabem.boabem", str)]
+#[derive(Debug)]
 pub struct PyUndefined {}
 
 #[pymethods]
@@ -14,7 +15,7 @@ impl PyUndefined {
     }
 
     fn __repr__(&self) -> String {
-        self.to_string()
+        format!("{:?}", self)
     }
 }
 
@@ -37,26 +38,35 @@ impl PyContext {
         boa_runtime::register(&mut context, boa_runtime::RegisterOptions::new())
             .expect("should not fail while registering the runtime");
 
-        PyContext { context: context }
+        PyContext { context }
     }
 
     pub fn eval(&mut self, source: &str) -> Result<PyObject> {
         let source = Source::from_bytes(source);
+        let value: JsValue = self
+            .context
+            .eval(source)
+            .map_err(|e| eyre!(e.to_string()))?;
+        self.jsvalue_to_pyobject(value)
+    }
+}
 
-        let value = match self.context.eval(source) {
-            Ok(JsValue::Undefined) => {
-                return Python::with_gil(|py| Ok(Py::new(py, PyUndefined::new())?.into_any()));
+impl PyContext {
+    fn jsvalue_to_pyobject(&mut self, value: JsValue) -> Result<PyObject> {
+        match value {
+            JsValue::Undefined => {
+                Python::with_gil(|py| Ok(Py::new(py, PyUndefined::new())?.into_any()))
             }
-            Ok(value) => value
-                .to_json(&mut self.context)
-                .map_err(|e| eyre!(e.to_string()))?,
-            Err(e) => return Err(eyre!(e.to_string())),
-        };
-
-        Python::with_gil(|py| {
-            pythonize(py, &value)
-                .map(PyObject::from)
-                .map_err(|e| eyre!(e.to_string()))
-        })
+            other => {
+                let json = other
+                    .to_json(&mut self.context)
+                    .map_err(|e| eyre!(e.to_string()))?;
+                Python::with_gil(|py| {
+                    pythonize(py, &json)
+                        .map(PyObject::from)
+                        .map_err(|e| eyre!(e.to_string()))
+                })
+            }
+        }
     }
 }
