@@ -12,12 +12,14 @@ classifiers = [
 ]
 dynamic = ["version"]
 
-
 [project.optional-dependencies]
 test = ["hypothesis[pytest]", "pytest-pretty"]
 
 [project.urls]
 source = "https://github.com/Bing-su/boabem"
+
+[dependency-groups]
+dev = ["nox"]
 
 [tool.maturin]
 python-source = "python"

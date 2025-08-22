@@ -1,0 +1,43 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.py"
+      - "**/*.rs"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/*.py"
+      - "**/*.rs"
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  test:
+    name: pytest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: astral-sh/setup-uv@v6
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - name: Run tests
+        run: uvx nox -s test
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
