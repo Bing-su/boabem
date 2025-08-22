@@ -68,8 +68,9 @@ impl PyContext {
 fn pybigint(value: &str) -> Result<PyObject> {
     Python::with_gil(|py| {
         let builtins = PyModule::import(py, "builtins")?;
-        let pyint = builtins.getattr("int")?;
-        Ok(pyint.call1((value,))?.into())
+        let int_class = builtins.getattr("int")?;
+        let pyint = int_class.call1((value,))?;
+        Ok(pyint.into())
     })
 }
 
