@@ -415,3 +415,30 @@ def test_integer_string_conversion_length_limitation():
     code = "10n ** 4300n"
     with pytest.raises(ValueError, match="Exceeds the limit"):
         ctx.eval(code)
+
+
+def test_cannot_convert_bigint_in_object():
+    ctx = Context()
+    with pytest.raises(RuntimeError, match="TypeError: cannot convert bigint"):
+        ctx.eval("({ a: 1n })")
+    with pytest.raises(RuntimeError, match="TypeError: cannot convert bigint"):
+        ctx.eval("[1, 2, 3n]")
+
+
+def test_cannot_convert_nan_inf_in_object():
+    ctx = Context()
+    result = ctx.eval("({ a: NaN, b: Infinity })")
+    assert isinstance(result, dict)
+    assert result == {"a": None, "b": None}
+
+    result = ctx.eval("[1, 2, NaN, Infinity]")
+    assert isinstance(result, list)
+    assert result == [1, 2, None, None]
+
+
+def test_cannot_convert_undefined_in_object():
+    ctx = Context()
+    with pytest.raises(BaseException, match="not yet implemented: undefined to JSON"):
+        ctx.eval("({ a: undefined })")
+    with pytest.raises(BaseException, match="not yet implemented: undefined to JSON"):
+        ctx.eval("[1, 2, undefined]")

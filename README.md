@@ -64,6 +64,18 @@ Notes:
 - Some JS values (e.g., Symbol) cannot be converted and will raise an error.
 - Each `undefined` you get back is a distinct Python object, but compares equal to another `Undefined`.
 
+### Object/Array conversion details
+
+When converting composite values (JavaScript Objects and Arrays) to Python `dict`/`list`, elements are converted recursively with a few caveats:
+
+- BigInt inside Objects/Arrays is not supported and raises a `RuntimeError` with message like `TypeError: cannot convert bigint`.
+  - Examples: `({ a: 1n })` or `[1, 2, 3n]` will error.
+- `NaN` and `±Infinity` inside Objects/Arrays are converted to `None` (JSON `null`).
+  - Examples: `({ a: NaN, b: Infinity }) -> {"a": None, "b": None}` and `[1, 2, NaN, Infinity] -> [1, 2, None, None]`.
+- `undefined` inside Objects/Arrays panics.
+
+Note: Top-level primitives are still mapped as documented above (e.g., `10n` -> `int`, `NaN`/`Infinity` -> `float('nan')`/`float('inf')`). The special rules here apply only to values nested within Objects/Arrays.
+
 ## Threading and processes
 
 Context is not thread-sendable or picklable:
