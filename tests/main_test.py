@@ -227,9 +227,8 @@ def test_regexp_test_and_exec():
 
 def test_date_to_string_typeof():
     ctx = Context()
-    # Date 객체의 typeof는 'object'이고 toString이 존재
     assert ctx.eval("typeof new Date()") == "object"
-    assert ctx.eval("new Date(0).toString()") == "Thu Jan 01 1970 09:00:00 GMT+0900"
+    assert ctx.eval("new Date(0).toUTCString()") == "Thu, 01 Jan 1970 00:00:00 GMT"
 
 
 def test_destructuring_and_spread():
