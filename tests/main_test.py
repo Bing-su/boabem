@@ -1,11 +1,12 @@
 import json
+import sys
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-import boabem
-from boabem import Context
+from boabem import Context, Undefined
 
 
 def test_banana():
@@ -21,6 +22,7 @@ def test_banana():
             "fail",
         ),
         ("10n ** 100n", 10**100),
+        ("-(10n ** 100n)", -(10**100)),
         ('parseInt("f*ck", 16)', 15),
         ('parseInt("Infinity", 35)', 1201203301724),
         ("parseInt(null, 24)", 23),
@@ -82,11 +84,9 @@ def test_null_and_undefined_are_distinct():
     js_null = ctx.eval("null")
     js_undef = ctx.eval("undefined")
 
-    # null은 Python None으로 매핑되어야 함
     assert js_null is None
-    # undefined는 null과 달라야 함(별도 센티널)
     assert js_undef != js_null
-    assert isinstance(js_undef, boabem.boabem.Undefined)
+    assert isinstance(js_undef, Undefined)
 
 
 def test_exception_propagation():
@@ -108,6 +108,12 @@ def test_eval_from_filepath(tmp_path: Path):
     ctx = Context()
     result = ctx.eval_from_filepath(p)
     assert result == 3
+
+    p.write_text("3 + 4", encoding="utf-8")
+
+    ctx = Context()
+    result = ctx.eval_from_filepath(str(p))
+    assert result == 7
 
 
 def test_nan_and_infinity():
@@ -142,6 +148,7 @@ def test_function_definition_and_call_across_evals():
     ctx = Context()
     ctx.eval("function inc(x) { return x + 1 }")
     assert ctx.eval("inc(41)") == 42
+    assert ctx.eval('inc("41")') == "411"
 
 
 def test_try_catch_returns_message():
@@ -171,6 +178,7 @@ def test_array_length():
 def test_json_stringify_roundtrip():
     ctx = Context()
     js = ctx.eval("JSON.stringify({a:1, b:[2,3], c:'x'})")
+    assert js == '{"a":1,"b":[2,3],"c":"x"}'
     obj = json.loads(js)
     assert obj == {"a": 1, "b": [2, 3], "c": "x"}
 
@@ -361,3 +369,48 @@ def test_cannot_convert_symbol():
     ctx = Context()
     with pytest.raises(RuntimeError, match="TypeError: cannot convert Symbol"):
         ctx.eval("Symbol('a')")
+
+
+def test_undefined_is_same():
+    ctx = Context()
+    undefined1 = ctx.eval("undefined")
+    undefined2 = ctx.eval("")
+    assert isinstance(undefined1, Undefined)
+    assert isinstance(undefined2, Undefined)
+
+    assert ctx.eval("undefined == undefined") is True
+    assert ctx.eval("undefined === undefined") is True
+    assert undefined1 == undefined2
+
+    assert ctx.eval("Object.is(undefined, undefined)") is True
+    assert undefined1 is not undefined2
+
+
+def test_thread_pool():
+    ctx = Context()
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(ctx.eval, "1 + 1")
+
+    # pyo3_runtime.PanicException
+    with pytest.raises(BaseException, match="unsendable"):
+        future.result()
+
+
+def test_process_pool():
+    ctx = Context()
+    with ProcessPoolExecutor() as executor:
+        future = executor.submit(ctx.eval, "1 + 1")
+
+    with pytest.raises(TypeError, match="cannot pickle"):
+        future.result()
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 11),
+    reason="https://docs.python.org/3.13/library/stdtypes.html#integer-string-conversion-length-limitation",
+)
+def test_integer_string_conversion_length_limitation():
+    ctx = Context()
+    code = "10n ** 4300n"
+    with pytest.raises(ValueError, match="Exceeds the limit"):
+        ctx.eval(code)

@@ -1,3 +1,3 @@
-from .boabem import Context, __version__
+from .boabem import Context, Undefined, __version__
 
-__all__ = ["Context", "__version__"]
+__all__ = ["Context", "Undefined", "__version__"]

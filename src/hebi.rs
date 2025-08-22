@@ -4,8 +4,8 @@ use pyo3::prelude::*;
 use pythonize::pythonize;
 use std::path::PathBuf;
 
-#[pyclass(name = "Undefined", module = "boabem.boabem", str)]
-#[derive(Debug)]
+#[pyclass(name = "Undefined", module = "boabem.boabem", str, eq, frozen)]
+#[derive(Debug, PartialEq)]
 pub struct PyUndefined {}
 
 #[pymethods]
@@ -55,8 +55,8 @@ impl PyContext {
         self.jsvalue_to_pyobject(value)
     }
 
-    pub fn eval_from_filepath(&mut self, path: PathBuf) -> Result<PyObject> {
-        let source = Source::from_filepath(&path)?;
+    pub fn eval_from_filepath(&mut self, source: PathBuf) -> Result<PyObject> {
+        let source = Source::from_filepath(&source)?;
         let value: JsValue = self
             .context
             .eval(source)
