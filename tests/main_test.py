@@ -1,6 +1,7 @@
 import json
 import sys
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from math import isinf, isnan
 from pathlib import Path
 from typing import Any
 
@@ -118,8 +119,9 @@ def test_eval_from_filepath(tmp_path: Path):
 
 def test_nan_and_infinity():
     ctx = Context()
-    assert ctx.eval("typeof NaN") == "number"
-    assert ctx.eval("typeof Infinity") == "number"
+    assert isnan(ctx.eval("NaN"))
+    assert isinf(ctx.eval("Infinity"))
+    assert isinf(ctx.eval("-Infinity"))
     assert ctx.eval("Number.isNaN(NaN)") is True
     assert ctx.eval("isNaN(0/0)") is True
     assert ctx.eval("isFinite(Infinity)") is False

@@ -65,6 +65,21 @@ impl PyContext {
     }
 }
 
+fn pybigint(value: &str) -> Result<PyObject> {
+    Python::with_gil(|py| {
+        let builtins = PyModule::import(py, "builtins")?;
+        let pyint = builtins.getattr("int")?;
+        Ok(pyint.call1((value,))?.into())
+    })
+}
+
+fn pyfloat(value: f64) -> Result<PyObject> {
+    Python::with_gil(|py| {
+        let pyfloat = value.into_pyobject(py)?;
+        Ok(pyfloat.into())
+    })
+}
+
 impl PyContext {
     fn jsvalue_to_pyobject(&mut self, value: JsValue) -> Result<PyObject> {
         match value {
@@ -73,12 +88,9 @@ impl PyContext {
             }
             JsValue::BigInt(js_bigint) => {
                 let bigint_str = js_bigint.to_string_radix(10);
-                Python::with_gil(|py| {
-                    let builtins = PyModule::import(py, "builtins")?;
-                    let pyint = builtins.getattr("int")?;
-                    Ok(pyint.call1((bigint_str,))?.into())
-                })
+                pybigint(&bigint_str)
             }
+            JsValue::Rational(f) => pyfloat(f),
             other => {
                 let json = other
                     .to_json(&mut self.context)
