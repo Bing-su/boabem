@@ -20,33 +20,43 @@ jobs:
           - os: ubuntu-latest
             manylinux: auto
             target: x86_64-unknown-linux-gnu
+            args: --out dist
           - os: ubuntu-24.04-arm
             manylinux: auto
             target: aarch64-unknown-linux-gnu
+            args: --out dist
           - os: ubuntu-latest
             manylinux: auto
             target: riscv64gc-unknown-linux-gnu
+            args: --out dist
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: x86_64-unknown-linux-musl
+            args: --out dist
           - os: ubuntu-24.04-arm
             manylinux: musllinux_1_2
             target: aarch64-unknown-linux-musl
+            args: --out dist
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: riscv64gc-unknown-linux-musl
+            args: --out dist --zig
           - os: macos-latest
             manylinux: auto
             target: x86_64-apple-darwin
+            args: --out dist
           - os: macos-latest
             manylinux: auto
             target: aarch64-apple-darwin
+            args: --out dist
           - os: windows-latest
             manylinux: auto
             target: x86_64-pc-windows-msvc
+            args: --out dist
           - os: windows-11-arm
             manylinux: auto
             target: aarch64-pc-windows-msvc
+            args: --out dist
 
     defaults:
       run:
@@ -64,6 +74,7 @@ jobs:
         with:
           manylinux: ${{ matrix.manylinux }}
           target: ${{ matrix.target }}
+          args: ${{ matrix.args }}
 
       - run: ls dist
 
