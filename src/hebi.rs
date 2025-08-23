@@ -1,5 +1,6 @@
 use boa_engine::{Context, JsValue, Source};
 use eyre::{Result, eyre};
+use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
 use pythonize::pythonize;
 use std::path::PathBuf;
@@ -11,12 +12,18 @@ pub struct PyUndefined {}
 #[pymethods]
 impl PyUndefined {
     #[new]
-    fn new() -> Self {
-        PyUndefined {}
+    fn py_new() -> Self {
+        Self::new()
     }
 
     fn __repr__(&self) -> &str {
         "Undefined"
+    }
+}
+
+impl PyUndefined {
+    fn new() -> Self {
+        Self {}
     }
 }
 
@@ -65,7 +72,7 @@ impl PyContext {
     }
 }
 
-fn pybigint(value: &str) -> Result<PyObject> {
+fn to_pybigint(value: &str) -> Result<PyObject> {
     Python::with_gil(|py| {
         let builtins = PyModule::import(py, "builtins")?;
         let int_class = builtins.getattr("int")?;
@@ -74,32 +81,19 @@ fn pybigint(value: &str) -> Result<PyObject> {
     })
 }
 
-fn pyint(value: i32) -> Result<PyObject> {
-    Python::with_gil(|py| {
-        let v = value.into_pyobject(py)?;
-        Ok(v.into())
-    })
-}
-
-fn pyfloat(value: f64) -> Result<PyObject> {
-    Python::with_gil(|py| {
-        let v = value.into_pyobject(py)?;
-        Ok(v.into())
-    })
+fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> Result<PyObject> {
+    Ok(value.into_py_any(py)?)
 }
 
 impl PyContext {
     fn jsvalue_to_pyobject(&mut self, value: JsValue) -> Result<PyObject> {
         match value {
-            JsValue::Undefined => {
-                Python::with_gil(|py| Ok(Py::new(py, PyUndefined::new())?.into_any()))
-            }
+            JsValue::Undefined => Python::with_gil(|py| to_pyobject(py, PyUndefined::new())),
             JsValue::BigInt(js_bigint) => {
                 let bigint_str = js_bigint.to_string_radix(10);
-                pybigint(&bigint_str)
+                to_pybigint(&bigint_str)
             }
-            JsValue::Rational(f) => pyfloat(f),
-            JsValue::Integer(i) => pyint(i),
+            JsValue::Rational(v) => Python::with_gil(|py| to_pyobject(py, v)),
             other => {
                 let json = other
                     .to_json(&mut self.context)
