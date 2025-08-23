@@ -144,3 +144,12 @@ def test_undefined_in_object():
         "undefined": Undefined(),
     }
     assert ctx.eval("[1, 2, undefined]") == [1, 2, Undefined()]
+
+
+def test_function():
+    ctx = Context()
+    code = """
+let test_add = (a, b) => a + b;
+test_add
+"""
+    assert ctx.eval(code) == {"length": 2, "name": "test_add"}
