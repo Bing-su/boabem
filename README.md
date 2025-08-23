@@ -42,6 +42,8 @@ result = ctx.eval_from_filepath(Path("script.js"))
   - eval(source: str) -> Any
   - eval_from_bytes(source: str) -> Any (same behavior as eval)
   - eval_from_filepath(path: str | os.PathLike[str]) -> Any
+- boabem.PanicException
+  - Exception class exposed for Rust panics (e.g., attempting to use a Context across threads).
 - boabem.Undefined
   - Sentinel type representing JavaScript `undefined`.
   - String representation: "Undefined".
@@ -68,11 +70,15 @@ Notes:
 
 When converting composite values (JavaScript Objects and Arrays) to Python `dict`/`list`, elements are converted recursively with a few caveats:
 
-- BigInt inside Objects/Arrays is not supported and raises a `RuntimeError` with message like `TypeError: cannot convert bigint`.
-  - Examples: `({ a: 1n })` or `[1, 2, 3n]` will error.
-- `NaN` and `±Infinity` inside Objects/Arrays are converted to `None` (JSON `null`).
-  - Examples: `({ a: NaN, b: Infinity }) -> {"a": None, "b": None}` and `[1, 2, NaN, Infinity] -> [1, 2, None, None]`.
-- `undefined` inside Objects/Arrays panics.
+- BigInt inside Objects/Arrays is converted to Python `int`.
+  - Examples: `({ a: 1n, 1: 2n, 2n: 3n }) -> {"a": 1, "1": 2, "2": 3}` and `[1, 2, 3n] -> [1, 2, 3]`.
+- `NaN` and `±Infinity` inside Objects/Arrays are preserved as Python floats (`float('nan')` / `float('inf')`).
+  - Examples: `({ a: NaN, b: Infinity }) -> {"a": nan, "b": inf}` and `[1, 2, NaN, Infinity] -> [1, 2, nan, inf]`.
+- `undefined` inside Objects/Arrays is converted to `boabem.Undefined`.
+
+Additional notes:
+
+- JavaScript object property keys are coerced to strings during conversion; for example, a `2n` property name becomes the Python key `"2"`.
 
 Note: Top-level primitives are still mapped as documented above (e.g., `10n` -> `int`, `NaN`/`Infinity` -> `float('nan')`/`float('inf')`). The special rules here apply only to values nested within Objects/Arrays.
 
@@ -83,6 +89,8 @@ Context is not thread-sendable or picklable:
 - Do not move or use a Context across threads (ThreadPoolExecutor will fail).
 - Do not send a Context to another process (cannot pickle).
 - Create and use a Context only in the thread where it was created.
+
+If you try to use a Context across threads, you'll get a Rust panic surfaced as `pyo3_runtime.PanicException` (exposed as `boabem.PanicException`).
 
 ## Errors
 
