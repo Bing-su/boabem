@@ -74,10 +74,17 @@ fn pybigint(value: &str) -> Result<PyObject> {
     })
 }
 
+fn pyint(value: i32) -> Result<PyObject> {
+    Python::with_gil(|py| {
+        let v = value.into_pyobject(py)?;
+        Ok(v.into())
+    })
+}
+
 fn pyfloat(value: f64) -> Result<PyObject> {
     Python::with_gil(|py| {
-        let pyfloat = value.into_pyobject(py)?;
-        Ok(pyfloat.into())
+        let v = value.into_pyobject(py)?;
+        Ok(v.into())
     })
 }
 
@@ -92,6 +99,7 @@ impl PyContext {
                 pybigint(&bigint_str)
             }
             JsValue::Rational(f) => pyfloat(f),
+            JsValue::Integer(i) => pyint(i),
             other => {
                 let json = other
                     .to_json(&mut self.context)
