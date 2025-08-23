@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from boabem import Context, Undefined
+from boabem import Context, PanicException, Undefined
 
 
 def test_banana():
@@ -393,7 +393,7 @@ def test_thread_pool():
         future = executor.submit(ctx.eval, "1 + 1")
 
     # pyo3_runtime.PanicException
-    with pytest.raises(BaseException, match="unsendable"):
+    with pytest.raises(PanicException, match="unsendable"):
         future.result()
 
 
@@ -438,7 +438,7 @@ def test_cannot_convert_nan_inf_in_object():
 
 def test_cannot_convert_undefined_in_object():
     ctx = Context()
-    with pytest.raises(BaseException, match="not yet implemented: undefined to JSON"):
+    with pytest.raises(PanicException, match="not yet implemented: undefined to JSON"):
         ctx.eval("({ a: undefined })")
-    with pytest.raises(BaseException, match="not yet implemented: undefined to JSON"):
+    with pytest.raises(PanicException, match="not yet implemented: undefined to JSON"):
         ctx.eval("[1, 2, undefined]")
