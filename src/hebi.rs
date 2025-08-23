@@ -1,8 +1,11 @@
+use boa_engine::value::TryFromJs;
 use boa_engine::{Context, JsValue, Source};
 use eyre::{Result, eyre};
 use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyList};
 use pythonize::pythonize;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 #[pyclass(name = "Undefined", module = "boabem.boabem", str, eq, frozen)]
@@ -94,6 +97,8 @@ impl PyContext {
                 to_pybigint(&bigint_str)
             }
             JsValue::Rational(v) => Python::with_gil(|py| to_pyobject(py, v)),
+            JsValue::Object(obj) if obj.is_array() => self.jsobj_to_py_list(&JsValue::Object(obj)),
+            JsValue::Object(obj) => self.jsobj_to_py_dict(&JsValue::Object(obj)),
             other => {
                 let json = other
                     .to_json(&mut self.context)
@@ -105,5 +110,34 @@ impl PyContext {
                 })
             }
         }
+    }
+
+    fn jsobj_to_py_list(&mut self, obj: &JsValue) -> Result<PyObject> {
+        let arr: Vec<JsValue> =
+            Vec::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
+
+        Python::with_gil(|py| {
+            let py_list = PyList::empty(py);
+            for item in arr {
+                let py_item = self.jsvalue_to_pyobject(item)?;
+                py_list.append(py_item)?;
+            }
+            Ok(py_list.into())
+        })
+    }
+
+    fn jsobj_to_py_dict(&mut self, obj: &JsValue) -> Result<PyObject> {
+        let map: HashMap<String, JsValue> =
+            HashMap::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
+
+        Python::with_gil(|py| {
+            let py_dict = PyDict::new(py);
+            for (key, value) in map {
+                let py_key = key;
+                let py_value = self.jsvalue_to_pyobject(value)?;
+                py_dict.set_item(py_key, py_value)?;
+            }
+            Ok(py_dict.into())
+        })
     }
 }
