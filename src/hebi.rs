@@ -133,9 +133,8 @@ impl PyContext {
         Python::with_gil(|py| {
             let py_dict = PyDict::new(py);
             for (key, value) in map {
-                let py_key = key;
                 let py_value = self.jsvalue_to_pyobject(value)?;
-                py_dict.set_item(py_key, py_value)?;
+                py_dict.set_item(key, py_value)?;
             }
             Ok(py_dict.into())
         })
