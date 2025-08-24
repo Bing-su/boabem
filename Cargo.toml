@@ -1,6 +1,6 @@
 [package]
 name = "boabem"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python bindings for the Rust crate 'boa', an embeddable JavaScript engine"
 edition = "2024"
 authors = ["Dowon <ks2515@naver.com>"]
