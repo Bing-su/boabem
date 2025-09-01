@@ -52,11 +52,11 @@ impl PyContext {
         PyContext { context }
     }
 
-    pub fn eval(&mut self, source: &str) -> Result<PyObject> {
+    pub fn eval(&mut self, source: &str) -> Result<Py<PyAny>> {
         self.eval_from_bytes(source)
     }
 
-    pub fn eval_from_bytes(&mut self, source: &str) -> Result<PyObject> {
+    pub fn eval_from_bytes(&mut self, source: &str) -> Result<Py<PyAny>> {
         let source = Source::from_bytes(source);
         let value: JsValue = self
             .context
@@ -65,7 +65,7 @@ impl PyContext {
         self.jsvalue_to_pyobject(value)
     }
 
-    pub fn eval_from_filepath(&mut self, source: PathBuf) -> Result<PyObject> {
+    pub fn eval_from_filepath(&mut self, source: PathBuf) -> Result<Py<PyAny>> {
         let source = Source::from_filepath(&source)?;
         let value: JsValue = self
             .context
@@ -75,8 +75,8 @@ impl PyContext {
     }
 }
 
-fn to_pybigint(value: &str) -> Result<PyObject> {
-    Python::with_gil(|py| {
+fn to_pybigint(value: &str) -> Result<Py<PyAny>> {
+    Python::attach(|py| {
         let builtins = PyModule::import(py, "builtins")?;
         let int_class = builtins.getattr("int")?;
         let pyint = int_class.call1((value,))?;
@@ -84,39 +84,39 @@ fn to_pybigint(value: &str) -> Result<PyObject> {
     })
 }
 
-fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> Result<PyObject> {
+fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> Result<Py<PyAny>> {
     Ok(value.into_py_any(py)?)
 }
 
 impl PyContext {
-    fn jsvalue_to_pyobject(&mut self, value: JsValue) -> Result<PyObject> {
+    fn jsvalue_to_pyobject(&mut self, value: JsValue) -> Result<Py<PyAny>> {
         match value {
-            JsValue::Undefined => Python::with_gil(|py| to_pyobject(py, PyUndefined::new())),
+            JsValue::Undefined => Python::attach(|py| to_pyobject(py, PyUndefined::new())),
             JsValue::BigInt(js_bigint) => {
                 let bigint_str = js_bigint.to_string_radix(10);
                 to_pybigint(&bigint_str)
             }
-            JsValue::Rational(v) => Python::with_gil(|py| to_pyobject(py, v)),
+            JsValue::Rational(v) => Python::attach(|py| to_pyobject(py, v)),
             JsValue::Object(obj) if obj.is_array() => self.jsobj_to_py_list(&JsValue::Object(obj)),
             JsValue::Object(obj) => self.jsobj_to_py_dict(&JsValue::Object(obj)),
             other => {
                 let json = other
                     .to_json(&mut self.context)
                     .map_err(|e| eyre!(e.to_string()))?;
-                Python::with_gil(|py| {
+                Python::attach(|py| {
                     pythonize(py, &json)
-                        .map(PyObject::from)
+                        .map(Py::<PyAny>::from)
                         .map_err(|e| eyre!(e.to_string()))
                 })
             }
         }
     }
 
-    fn jsobj_to_py_list(&mut self, obj: &JsValue) -> Result<PyObject> {
+    fn jsobj_to_py_list(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
         let arr: Vec<JsValue> =
             Vec::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
 
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let py_list = PyList::empty(py);
             for item in arr {
                 let py_item = self.jsvalue_to_pyobject(item)?;
@@ -126,11 +126,11 @@ impl PyContext {
         })
     }
 
-    fn jsobj_to_py_dict(&mut self, obj: &JsValue) -> Result<PyObject> {
+    fn jsobj_to_py_dict(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
         let map: HashMap<String, JsValue> =
             HashMap::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
 
-        Python::with_gil(|py| {
+        Python::attach(|py| {
             let py_dict = PyDict::new(py);
             for (key, value) in map {
                 let py_value = self.jsvalue_to_pyobject(value)?;
