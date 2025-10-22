@@ -1,10 +1,9 @@
 use boa_engine::value::TryFromJs;
-use boa_engine::{Context, JsValue, Source};
+use boa_engine::{Context, JsValue, JsVariant, Source};
 use eyre::{Result, eyre};
 use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
-use pythonize::pythonize;
+use pyo3::types::{PyDict, PyList, PyNone};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -46,10 +45,19 @@ impl PyContext {
     #[new]
     fn new() -> Self {
         let mut context = Context::default();
-        boa_runtime::register(&mut context, boa_runtime::RegisterOptions::new())
-            .expect("should not fail while registering the runtime");
+        boa_runtime::register(
+            (
+                boa_runtime::extensions::ConsoleExtension::default(),
+                boa_runtime::extensions::FetchExtension(
+                    boa_runtime::fetch::BlockingReqwestFetcher::default(),
+                ),
+            ),
+            None,
+            &mut context,
+        )
+        .expect("should not fail while registering the runtime");
 
-        PyContext { context }
+        Self { context }
     }
 
     pub fn eval(&mut self, source: &str) -> Result<Py<PyAny>> {
@@ -90,29 +98,24 @@ fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> Result<P
 
 impl PyContext {
     fn jsvalue_to_pyobject(&mut self, value: JsValue) -> Result<Py<PyAny>> {
-        match value {
-            JsValue::Undefined => Python::attach(|py| to_pyobject(py, PyUndefined::new())),
-            JsValue::BigInt(js_bigint) => {
+        match value.variant() {
+            JsVariant::Null => Python::attach(|py| to_pyobject(py, PyNone::get(py))),
+            JsVariant::Undefined => Python::attach(|py| to_pyobject(py, PyUndefined::new())),
+            JsVariant::Boolean(v) => Python::attach(|py| to_pyobject(py, v)),
+            JsVariant::String(v) => Python::attach(|py| to_pyobject(py, v.to_std_string_escaped())),
+            JsVariant::Float64(v) => Python::attach(|py| to_pyobject(py, v)),
+            JsVariant::Integer32(v) => Python::attach(|py| to_pyobject(py, v)),
+            JsVariant::BigInt(js_bigint) => {
                 let bigint_str = js_bigint.to_string_radix(10);
                 to_pybigint(&bigint_str)
             }
-            JsValue::Rational(v) => Python::attach(|py| to_pyobject(py, v)),
-            JsValue::Object(obj) if obj.is_array() => self.jsobj_to_py_list(&JsValue::Object(obj)),
-            JsValue::Object(obj) => self.jsobj_to_py_dict(&JsValue::Object(obj)),
-            other => {
-                let json = other
-                    .to_json(&mut self.context)
-                    .map_err(|e| eyre!(e.to_string()))?;
-                Python::attach(|py| {
-                    pythonize(py, &json)
-                        .map(Py::<PyAny>::from)
-                        .map_err(|e| eyre!(e.to_string()))
-                })
-            }
+            JsVariant::Object(obj) if obj.is_array() => self.jsobj_to_pylist(&value),
+            JsVariant::Object(_) => self.jsobj_to_pydict(&value),
+            JsVariant::Symbol(_) => Err(eyre!("TypeError: cannot convert Symbol to JSON")),
         }
     }
 
-    fn jsobj_to_py_list(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
+    fn jsobj_to_pylist(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
         let arr: Vec<JsValue> =
             Vec::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
 
@@ -126,7 +129,7 @@ impl PyContext {
         })
     }
 
-    fn jsobj_to_py_dict(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
+    fn jsobj_to_pydict(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
         let map: HashMap<String, JsValue> =
             HashMap::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
 

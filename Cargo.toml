@@ -28,7 +28,6 @@ boa_engine = { version = "~0.21.0", features = [
     "native-backtrace",
 ] }
 boa_runtime = { version = "~0.21.0", features = ["all"] }
-pythonize = "0.26"
 eyre = "0.6"
 
 [profile.release]
