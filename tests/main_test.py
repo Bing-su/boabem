@@ -403,3 +403,46 @@ def test_process_pool():
 
     with pytest.raises(TypeError, match="cannot pickle"):
         future.result()
+
+
+def test_url_basic():
+    ctx = Context()
+    ctx.eval(
+        "url = new URL('https://example.com:8080/path/to/resource?query#fragment')"
+    )
+    assert ctx.eval("url instanceof URL") is True
+    assert (
+        ctx.eval("url.href")
+        == "https://example.com:8080/path/to/resource?query#fragment"
+    )
+    assert ctx.eval("url.protocol") == "https:"
+    assert ctx.eval("url.host") == "example.com:8080"
+    assert ctx.eval("url.hostname") == "example.com"
+    assert ctx.eval("url.port") == "8080"
+    assert ctx.eval("url.pathname") == "/path/to/resource"
+    assert ctx.eval("url.search") == "?query"
+    assert ctx.eval("url.hash") == "#fragment"
+
+
+def test_url_static_methods():
+    ctx = Context()
+    assert (
+        ctx.eval('URL.canParse("http://example.org/new/path?new-query#new-fragment")')
+        is True
+    )
+    assert (
+        ctx.eval('!URL.canParse("http//:example.org/new/path?new-query#new-fragment")')
+        is True
+    )
+    assert (
+        ctx.eval(
+            '!URL.canParse("http://example.org/new/path?new-query#new-fragment", "http:")'
+        )
+        is True
+    )
+    assert (
+        ctx.eval(
+            'URL.canParse("/new/path?new-query#new-fragment", "http://example.org/")'
+        )
+        is True
+    )
