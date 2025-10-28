@@ -3,7 +3,7 @@ use boa_engine::{Context, JsValue, JsVariant, Source};
 use eyre::{Result, eyre};
 use pyo3::IntoPyObjectExt;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList, PyNone};
+use pyo3::types::{PyDict, PyInt, PyList, PyNone};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -85,8 +85,7 @@ impl PyContext {
 
 fn to_pybigint(value: &str) -> Result<Py<PyAny>> {
     Python::attach(|py| {
-        let builtins = PyModule::import(py, "builtins")?;
-        let int_class = builtins.getattr("int")?;
+        let int_class = py.get_type::<PyInt>();
         let pyint = int_class.call1((value,))?;
         Ok(pyint.into())
     })
