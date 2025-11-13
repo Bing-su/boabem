@@ -1,38 +1,38 @@
 [package]
 name = "boabem"
 version = "0.3.0"
-description = "Python bindings for the Rust crate 'boa', an embeddable JavaScript engine"
 edition = "2024"
-authors = ["Dowon <ks2515@naver.com>"]
+description = "Python bindings for the Rust crate 'boa', an embeddable JavaScript engine"
 readme = "README.md"
 repository = "https://github.com/Bing-su/boabem"
 license = "MIT or Apache-2.0"
+categories = ["pyo3"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "boabem"
 crate-type = ["cdylib"]
+name = "boabem"
 
 [dependencies]
-pyo3 = { version = ">=0.27, <1", features = [
-    "extension-module",
-    "generate-import-lib",
-    "eyre",
-] }
 boa_engine = { version = "~0.21.0", features = [
-    "annex-b",
-    "flowgraph",
-    "trace",
-    "intl_bundled",
-    "temporal",
-    "native-backtrace",
+  "annex-b",
+  "flowgraph",
+  "intl_bundled",
+  "native-backtrace",
+  "temporal",
+  "trace",
 ] }
 boa_runtime = { version = "~0.21.0", features = ["all"] }
 eyre = ">=0.6, <1"
+pyo3 = { version = ">=0.27, <1", features = [
+  "extension-module",
+  "eyre",
+  "generate-import-lib",
+] }
 reqwest = { version = ">=0.12, <1", features = ["native-tls-vendored"] }
 
 [profile.release]
+split-debuginfo = "packed"
 strip = true
 lto = true
 codegen-units = 1
-split-debuginfo = "packed"
