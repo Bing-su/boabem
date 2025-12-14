@@ -2,7 +2,7 @@
 name = "boabem"
 description = "Python bindings for the Rust crate 'boa', an embeddable JavaScript engine"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT or Apache-2.0"
 authors = [{ name = "Dowon", email = "ks2515@naver.com" }]
 keywords = ["javascript", "js"]
@@ -26,7 +26,7 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]
-features = ["pyo3/abi3-py39"]
+features = ["pyo3/abi3-py310"]
 profile = "release"
 python-source = "python"
 
