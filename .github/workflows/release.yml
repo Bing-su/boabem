@@ -21,42 +21,52 @@ jobs:
             manylinux: auto
             target: x86_64-unknown-linux-gnu
             args: --out dist --zig
+            interpreter: 3.10 3.14t pypy3.11 graalpy3.11 graalpy3.12
           - os: ubuntu-24.04-arm
             manylinux: auto
             target: aarch64-unknown-linux-gnu
             args: --out dist --zig
+            interpreter: 3.10 3.14t pypy3.11 graalpy3.11 graalpy3.12
           - os: ubuntu-latest
             manylinux: auto
             target: riscv64gc-unknown-linux-gnu
             args: --out dist
+            interpreter: 3.10 3.14t
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: x86_64-unknown-linux-musl
             args: --out dist
+            interpreter: 3.10 3.14t
           - os: ubuntu-24.04-arm
             manylinux: musllinux_1_2
             target: aarch64-unknown-linux-musl
             args: --out dist
+            interpreter: 3.10 3.14t
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: riscv64gc-unknown-linux-musl
             args: --out dist --zig
+            interpreter: 3.10 3.14t
           - os: macos-latest
             manylinux: auto
             target: x86_64-apple-darwin
             args: --out dist
+            interpreter: 3.10 3.14t
           - os: macos-latest
             manylinux: auto
             target: aarch64-apple-darwin
             args: --out dist
+            interpreter: 3.10 3.14t pypy3.11 graalpy3.11 graalpy3.12
           - os: windows-latest
             manylinux: auto
             target: x86_64-pc-windows-msvc
             args: --out dist
+            interpreter: 3.10 3.14t pypy3.11
           - os: windows-11-arm
             manylinux: auto
             target: aarch64-pc-windows-msvc
             args: --out dist
+            interpreter: 3.10 3.14t
 
     defaults:
       run:
@@ -65,6 +75,9 @@ jobs:
     steps:
       - uses: hustcer/setup-nu@v3
       - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
       - uses: dtolnay/rust-toolchain@stable
         with:
           target: ${{ matrix.target }}
@@ -74,7 +87,7 @@ jobs:
         with:
           manylinux: ${{ matrix.manylinux }}
           target: ${{ matrix.target }}
-          args: ${{ matrix.args }}
+          args: ${{ matrix.args }} --interpreter ${{ matrix.interpreter }}
 
       - run: ls dist
 
