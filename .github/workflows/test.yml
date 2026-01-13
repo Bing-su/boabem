@@ -7,12 +7,14 @@ on:
     paths:
       - "**/*.py"
       - "**/*.rs"
+      - ".github/workflows/test.yml"
   pull_request:
     branches:
       - main
     paths:
       - "**/*.py"
       - "**/*.rs"
+      - ".github/workflows/test.yml"
   schedule:
     - cron: "0 0 * * 0"
   workflow_dispatch:
