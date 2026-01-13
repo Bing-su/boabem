@@ -1,4 +1,5 @@
 import json
+import platform
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from math import isinf, isnan
 from pathlib import Path
@@ -396,6 +397,7 @@ def test_thread_pool():
         future.result()
 
 
+@pytest.mark.xfail(platform.python_implementation() == "PyPy", reason="pypy")
 def test_process_pool():
     ctx = Context()
     with ProcessPoolExecutor() as executor:
