@@ -22,7 +22,7 @@ test = ["hypothesis[pytest]", "pytest-pretty", "json-five", "deepdiff"]
 dev = ["nox"]
 
 [build-system]
-requires = ["maturin>=1.9,<2.0"]
+requires = ["maturin>=1.11,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]
