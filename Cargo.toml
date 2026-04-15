@@ -14,7 +14,7 @@ crate-type = ["cdylib"]
 name = "boabem"
 
 [dependencies]
-boa_engine = { version = "~0.21.0", features = [
+boa_engine = { version = "~0.21.1", features = [
   "annex-b",
   "flowgraph",
   "intl_bundled",
@@ -22,14 +22,14 @@ boa_engine = { version = "~0.21.0", features = [
   "temporal",
   "trace",
 ] }
-boa_runtime = { version = "~0.21.0", features = ["all"] }
+boa_runtime = { version = "~0.21.1", features = ["all"] }
 eyre = ">=0.6, <1"
 pyo3 = { version = ">=0.28, <1", features = [
   "extension-module",
   "eyre",
   "generate-import-lib",
 ] }
-reqwest = { version = ">=0.13, <1", features = ["native-tls-vendored"] }
+reqwest = { version = "<0.13", features = ["native-tls-vendored"] }
 
 [profile.release]
 split-debuginfo = "packed"

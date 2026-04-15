@@ -1,16 +1,14 @@
 [project]
 name = "boabem"
-description = "Python bindings for the Rust crate 'boa', an embeddable JavaScript engine"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT or Apache-2.0"
 authors = [{ name = "Dowon", email = "ks2515@naver.com" }]
 keywords = ["javascript", "js"]
 classifiers = [
   "Programming Language :: JavaScript",
   "Programming Language :: Rust",
 ]
-dynamic = ["version"]
+dynamic = ["description", "license", "version"]
 
 [project.urls]
 source = "https://github.com/Bing-su/boabem"
@@ -22,10 +20,11 @@ test = ["hypothesis[pytest]", "pytest-pretty", "json-five", "deepdiff"]
 dev = ["nox"]
 
 [build-system]
-requires = ["maturin>=1.11,<2.0"]
+requires = ["maturin>=1.13,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]
+auditwheel = "repair"
 features = ["pyo3/abi3-py310"]
 profile = "release"
 python-source = "python"
