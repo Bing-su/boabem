@@ -106,7 +106,7 @@ jobs:
       - uses: hustcer/setup-nu@v3
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
-      - uses: astral-sh/setup-uv@v8.0.0
+      - uses: astral-sh/setup-uv@v8.1.0
 
       - name: Build sdist
         run: uv build --sdist
