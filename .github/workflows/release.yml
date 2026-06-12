@@ -112,18 +112,18 @@ jobs:
         run: |
           uv tool install --with pyodide-build pyodide-cli
           let EMSCRIPTEN_VERSION = (pyodide config get emscripten_version)
-          let PYTHON_VERSION = (pyodide config get python_version | split row "." | take 2 | join ".")
-          echo $"EMSCRIPTEN_VERSION=($EMSCRIPTEN_VERSION)" | save -a $env.GITHUB_ENV
-          echo $"PYTHON_VERSION=($PYTHON_VERSION)" | save -a $env.GITHUB_ENV
+          let PYTHON_VERSION = (pyodide config get python_version | split row "." | take 2 | str join ".")
+          echo $"EMSCRIPTEN_VERSION=($EMSCRIPTEN_VERSION)\n" | save -a $env.GITHUB_ENV
+          echo $"PYTHON_VERSION=($PYTHON_VERSION)\n" | save -a $env.GITHUB_ENV
 
-          echo "## Version Info\n" | save -a $GITHUB_STEP_SUMMARY
-          echo $"Emscripten version: ($EMSCRIPTEN_VERSION)" | save -a $GITHUB_STEP_SUMMARY
-          echo $"Python version: ($PYTHON_VERSION)" | save -a $GITHUB_STEP_SUMMARY
+          echo "## Version Info\n" | save -a $env.GITHUB_STEP_SUMMARY
+          echo $"Emscripten version: ($EMSCRIPTEN_VERSION)\n" | save -a $env.GITHUB_STEP_SUMMARY
+          echo $"Python version: ($PYTHON_VERSION)\n" | save -a $env.GITHUB_STEP_SUMMARY
 
           do -i {
             let PYODIDE_ABI_VERSION = (pyodide config get pyodide_abi_version)
-            echo $"PYODIDE_ABI_VERSION=($PYODIDE_ABI_VERSION)" | save -a $env.GITHUB_ENV
-            echo $"Pyodide ABI version: ($PYODIDE_ABI_VERSION)" | save -a $GITHUB_STEP_SUMMARY
+            echo $"PYODIDE_ABI_VERSION=($PYODIDE_ABI_VERSION)\n" | save -a $env.GITHUB_ENV
+            echo $"Pyodide ABI version: ($PYODIDE_ABI_VERSION)\n" | save -a $env.GITHUB_STEP_SUMMARY
           }
 
       - uses: emscripten-core/setup-emsdk@v16
