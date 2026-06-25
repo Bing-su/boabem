@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - uses: hustcer/setup-nu@v3
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -105,7 +105,7 @@ jobs:
         shell: nu {0}
     steps:
       - uses: hustcer/setup-nu@v3
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v8.2.0
 
       - name: Get Emscripten and Python version info
@@ -155,7 +155,7 @@ jobs:
         shell: nu {0}
     steps:
       - uses: hustcer/setup-nu@v3
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: astral-sh/setup-uv@v8.2.0
 
