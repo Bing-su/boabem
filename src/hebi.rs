@@ -25,7 +25,7 @@ impl PyUndefined {
 }
 
 impl PyUndefined {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {}
     }
 }

@@ -15,4 +15,8 @@ mod boabem {
 
     #[pymodule_export]
     use pyo3::panic::PanicException;
+
+    #[pymodule_export]
+    #[allow(non_upper_case_globals)]
+    const undefined: PyUndefined = PyUndefined {};
 }

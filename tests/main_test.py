@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from boabem import Context, PanicException, Undefined
+from boabem import Context, PanicException, Undefined, undefined
 
 
 def test_banana():
@@ -385,6 +385,9 @@ def test_undefined_is_same():
 
     assert ctx.eval("Object.is(undefined, undefined)") is True
     assert undefined1 is not undefined2
+
+    assert undefined1 == undefined
+    assert undefined2 == undefined
 
 
 def test_thread_pool():
