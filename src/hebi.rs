@@ -6,7 +6,7 @@ use boa_engine::{Context, JsValue, JsVariant, Source};
 use pyo3::IntoPyObjectExt;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyInt, PyList, PyNone};
+use pyo3::types::{PyDict, PyList, PyNone};
 
 #[pyclass(name = "Undefined", module = "boabem.boabem", str, eq, frozen)]
 #[derive(Debug, PartialEq)]
@@ -84,14 +84,6 @@ impl PyContext {
     }
 }
 
-fn to_pybigint(value: &str) -> PyResult<Py<PyAny>> {
-    Python::attach(|py| {
-        let int_class = py.get_type::<PyInt>();
-        let pyint = int_class.call1((value,))?;
-        Ok(pyint.into())
-    })
-}
-
 fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> PyResult<Py<PyAny>> {
     Ok(value.into_py_any(py)?)
 }
@@ -105,10 +97,7 @@ impl PyContext {
             JsVariant::String(v) => Python::attach(|py| to_pyobject(py, v.to_std_string_escaped())),
             JsVariant::Float64(v) => Python::attach(|py| to_pyobject(py, v)),
             JsVariant::Integer32(v) => Python::attach(|py| to_pyobject(py, v)),
-            JsVariant::BigInt(js_bigint) => {
-                let bigint_str = js_bigint.to_string_radix(10);
-                to_pybigint(&bigint_str)
-            }
+            JsVariant::BigInt(v) => Python::attach(|py| to_pyobject(py, v.as_inner())),
             JsVariant::Object(obj) if obj.is_array() => self.jsobj_to_pylist(&value),
             JsVariant::Object(_) => self.jsobj_to_pydict(&value),
             JsVariant::Symbol(_) => Err(PyRuntimeError::new_err(

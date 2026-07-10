@@ -105,8 +105,8 @@ obj
 def test_integer_string_conversion_length_limitation():
     ctx = Context()
     code = "10n ** 4300n"
-    with pytest.raises(ValueError, match="Exceeds the limit"):
-        ctx.eval(code)
+    result = ctx.eval(code)
+    assert result == 10**4300
 
 
 def test_bigint_in_object():
