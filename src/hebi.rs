@@ -1,11 +1,12 @@
-use boa_engine::value::TryFromJs;
-use boa_engine::{Context, JsValue, JsVariant, Source};
-use eyre::{Result, eyre};
-use pyo3::IntoPyObjectExt;
-use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyInt, PyList, PyNone};
 use std::collections::HashMap;
 use std::path::PathBuf;
+
+use boa_engine::value::TryFromJs;
+use boa_engine::{Context, JsValue, JsVariant, Source};
+use pyo3::IntoPyObjectExt;
+use pyo3::exceptions::PyRuntimeError;
+use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyInt, PyList, PyNone};
 
 #[pyclass(name = "Undefined", module = "boabem.boabem", str, eq, frozen)]
 #[derive(Debug, PartialEq)]
@@ -60,30 +61,30 @@ impl PyContext {
         Self { context }
     }
 
-    pub fn eval(&mut self, source: &str) -> Result<Py<PyAny>> {
+    pub fn eval(&mut self, source: &str) -> PyResult<Py<PyAny>> {
         self.eval_from_bytes(source)
     }
 
-    pub fn eval_from_bytes(&mut self, source: &str) -> Result<Py<PyAny>> {
+    pub fn eval_from_bytes(&mut self, source: &str) -> PyResult<Py<PyAny>> {
         let source = Source::from_bytes(source);
         let value: JsValue = self
             .context
             .eval(source)
-            .map_err(|e| eyre!(e.to_string()))?;
+            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
         self.jsvalue_to_pyobject(value)
     }
 
-    pub fn eval_from_filepath(&mut self, source: PathBuf) -> Result<Py<PyAny>> {
+    pub fn eval_from_filepath(&mut self, source: PathBuf) -> PyResult<Py<PyAny>> {
         let source = Source::from_filepath(&source)?;
         let value: JsValue = self
             .context
             .eval(source)
-            .map_err(|e| eyre!(e.to_string()))?;
+            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
         self.jsvalue_to_pyobject(value)
     }
 }
 
-fn to_pybigint(value: &str) -> Result<Py<PyAny>> {
+fn to_pybigint(value: &str) -> PyResult<Py<PyAny>> {
     Python::attach(|py| {
         let int_class = py.get_type::<PyInt>();
         let pyint = int_class.call1((value,))?;
@@ -91,12 +92,12 @@ fn to_pybigint(value: &str) -> Result<Py<PyAny>> {
     })
 }
 
-fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> Result<Py<PyAny>> {
+fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> PyResult<Py<PyAny>> {
     Ok(value.into_py_any(py)?)
 }
 
 impl PyContext {
-    fn jsvalue_to_pyobject(&mut self, value: JsValue) -> Result<Py<PyAny>> {
+    fn jsvalue_to_pyobject(&mut self, value: JsValue) -> PyResult<Py<PyAny>> {
         match value.variant() {
             JsVariant::Null => Python::attach(|py| to_pyobject(py, PyNone::get(py))),
             JsVariant::Undefined => Python::attach(|py| to_pyobject(py, PyUndefined::new())),
@@ -110,13 +111,15 @@ impl PyContext {
             }
             JsVariant::Object(obj) if obj.is_array() => self.jsobj_to_pylist(&value),
             JsVariant::Object(_) => self.jsobj_to_pydict(&value),
-            JsVariant::Symbol(_) => Err(eyre!("TypeError: cannot convert Symbol to JSON")),
+            JsVariant::Symbol(_) => Err(PyRuntimeError::new_err(
+                "TypeError: cannot convert Symbol to JSON",
+            )),
         }
     }
 
-    fn jsobj_to_pylist(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
-        let arr: Vec<JsValue> =
-            Vec::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
+    fn jsobj_to_pylist(&mut self, obj: &JsValue) -> PyResult<Py<PyAny>> {
+        let arr: Vec<JsValue> = Vec::try_from_js(obj, &mut self.context)
+            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
 
         Python::attach(|py| {
             let py_list = PyList::empty(py);
@@ -128,9 +131,9 @@ impl PyContext {
         })
     }
 
-    fn jsobj_to_pydict(&mut self, obj: &JsValue) -> Result<Py<PyAny>> {
-        let map: HashMap<String, JsValue> =
-            HashMap::try_from_js(obj, &mut self.context).map_err(|e| eyre!(e.to_string()))?;
+    fn jsobj_to_pydict(&mut self, obj: &JsValue) -> PyResult<Py<PyAny>> {
+        let map: HashMap<String, JsValue> = HashMap::try_from_js(obj, &mut self.context)
+            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
 
         Python::attach(|py| {
             let py_dict = PyDict::new(py);
