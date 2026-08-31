@@ -21,8 +21,8 @@ ctx = Context()
 ctx.eval("var x = 41")
 print(ctx.eval("x + 1"))  # 42
 
-print(ctx.eval("'A' + 'B'"))         # 'AB'
-print(ctx.eval("[1,2,3].length"))    # 3
+print(ctx.eval("'A' + 'B'"))  # 'AB'
+print(ctx.eval("[1,2,3].length"))  # 3
 print(ctx.eval("JSON.stringify({a:1})"))  # '{"a":1}'
 ```
 
