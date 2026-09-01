@@ -3,6 +3,8 @@ use std::path::PathBuf;
 
 use boa_engine::value::TryFromJs;
 use boa_engine::{Context, JsValue, JsVariant, Source};
+use num_bigint::BigInt;
+use num_traits::Num;
 use pyo3::IntoPyObjectExt;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
@@ -88,6 +90,12 @@ fn to_pyobject<'a, T: IntoPyObjectExt<'a>>(py: Python<'a>, value: T) -> PyResult
     Ok(value.into_py_any(py)?)
 }
 
+fn to_pybigint(value: &str) -> PyResult<Py<PyAny>> {
+    let int: BigInt = BigInt::from_str_radix(value, 10)
+        .map_err(|_| PyRuntimeError::new_err("Failed to parse BigInt"))?;
+    Python::attach(|py| to_pyobject(py, int))
+}
+
 impl PyContext {
     fn jsvalue_to_pyobject(&mut self, value: JsValue) -> PyResult<Py<PyAny>> {
         match value.variant() {
@@ -97,7 +105,7 @@ impl PyContext {
             JsVariant::String(v) => Python::attach(|py| to_pyobject(py, v.to_std_string_escaped())),
             JsVariant::Float64(v) => Python::attach(|py| to_pyobject(py, v)),
             JsVariant::Integer32(v) => Python::attach(|py| to_pyobject(py, v)),
-            JsVariant::BigInt(v) => Python::attach(|py| to_pyobject(py, v.as_inner())),
+            JsVariant::BigInt(v) => to_pybigint(&v.to_string_radix(10)),
             JsVariant::Object(obj) if obj.is_array() => self.jsobj_to_pylist(&value),
             JsVariant::Object(_) => self.jsobj_to_pydict(&value),
             JsVariant::Symbol(_) => Err(PyRuntimeError::new_err(

@@ -15,19 +15,23 @@ name = "boabem"
 
 [dependencies]
 boa_engine = {
-  version = "~0.21.1",
+  version = "~0.22.0",
   features = [
     "annex-b",
+    "embedded_lz4",
     "flowgraph",
     "intl_bundled",
+    "js",
     "native-backtrace",
-    "temporal",
+    "system-time-zone",
     "trace",
   ]
 }
-boa_runtime = { version = "~0.21.1", features = ["all"] }
+boa_runtime = { version = "~0.22.0", features = ["all"] }
+num-bigint = "0.4"
+num-traits = "0.2"
 pyo3 = { version = "0.29", features = ["num-bigint"] }
-reqwest = { version = "0.12.28", features = ["native-tls-vendored"] }
+reqwest = "0.13"
 
 [profile.release]
 split-debuginfo = "packed"

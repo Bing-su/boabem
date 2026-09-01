@@ -451,3 +451,45 @@ def test_url_static_methods():
         )
         is True
     )
+
+
+def test_fetch_basic():
+    ctx = Context()
+    ctx.eval("fetch_result = fetch('https://example.com')")
+    result = ctx.eval("fetch_result")
+    assert result is not None
+    assert ctx.eval("fetch_result instanceof Promise") is True
+
+
+def test_regexp_basic():
+    ctx = Context()
+    ctx.eval("regexp = /\\d+/g")
+    assert ctx.eval("regexp instanceof RegExp") is True
+    assert ctx.eval("regexp.source") == "\\d+"
+    assert ctx.eval("regexp.flags") == "g"
+
+
+def test_regexp_flags():
+    ctx = Context()
+    ctx.eval("regexp = /\\w+/gi")
+    assert ctx.eval("regexp instanceof RegExp") is True
+    assert ctx.eval("regexp.source") == "\\w+"
+    assert ctx.eval("regexp.flags") == "gi"
+
+
+def test_regexp_unicode():
+    ctx = Context()
+    ctx.eval("regexp = /\\p{L}+/gu")
+    assert ctx.eval("regexp instanceof RegExp") is True
+    assert ctx.eval("regexp.source") == "\\p{L}+"
+    assert ctx.eval("regexp.flags") == "gu"
+
+
+def test_regexp_escape():
+    ctx = Context()
+    assert (
+        ctx.eval("RegExp.escape('0.1 + 0.2 != 0.3')")
+        == "\\x30\\.1\\x20\\+\\x200\\.2\\x20\\x21\\x3d\\x200\\.3"
+    )
+    assert ctx.eval("RegExp.escape('(abc)')") == "\\(abc\\)"
+    assert ctx.eval("RegExp.escape('foo-bar')") == "\\x66oo\\x2dbar"
