@@ -21,68 +21,94 @@ jobs:
           - os: ubuntu-latest
             manylinux: auto
             target: x86_64-unknown-linux-gnu
-            args: --out dist --zig --interpreter 3.10 3.14t 3.15t pypy3.11 graalpy3.12
+            args: --out dist --zig
+            interpreter: -i 3.10 3.14t pypy3.11 graalpy3.12
+            abi3t: true
           - os: ubuntu-24.04-arm
             manylinux: auto
             target: aarch64-unknown-linux-gnu
-            args: --out dist --zig --interpreter 3.10 3.14t 3.15t pypy3.11 graalpy3.12
+            args: --out dist --zig
+            interpreter: -i 3.10 3.14t pypy3.11 graalpy3.12
+            abi3t: true
           - os: ubuntu-latest
             manylinux: auto
             target: riscv64gc-unknown-linux-gnu
-            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
+            args: --out dist --zig
+            interpreter: -i 3.10 3.14t
+            abi3t: true
 
           # Linux - musllinux
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: x86_64-unknown-linux-musl
-            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
+            args: --out dist --zig
+            interpreter: -i 3.10 3.14t
+            abi3t: true
           - os: ubuntu-26.04-arm
             manylinux: musllinux_1_2
             target: aarch64-unknown-linux-musl
-            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
+            args: --out dist --zig
+            interpreter: -i 3.10 3.14t
+            abi3t: true
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: riscv64gc-unknown-linux-musl
-            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
+            args: --out dist --zig
+            interpreter: -i 3.10 3.14t
+            abi3t: true
 
           # macOS
           - os: macos-latest
             manylinux: auto
             target: x86_64-apple-darwin
-            args: --out dist --interpreter 3.10 3.14t 3.15t
+            args: --out dist
+            interpreter: -i 3.10 3.14t
+            abi3t: true
           - os: macos-latest
             manylinux: auto
             target: aarch64-apple-darwin
-            args: --out dist --interpreter 3.10 3.14t 3.15t pypy3.11 graalpy3.12
+            args: --out dist
+            interpreter: -i 3.10 3.14t pypy3.11 graalpy3.12
+            abi3t: true
 
           # Windows
           - os: windows-latest
             manylinux: auto
             target: x86_64-pc-windows-msvc
-            args: --out dist --interpreter 3.10 3.14t 3.15t pypy3.11
+            args: --out dist
+            interpreter: -i 3.10 3.14t pypy3.11
+            abi3t: true
           - os: windows-11-arm
             manylinux: auto
             target: aarch64-pc-windows-msvc
-            args: --out dist --interpreter 3.10 3.14t 3.15t
+            args: --out dist
+            interpreter: -i 3.10 3.14t
+            abi3t: true
 
           # etc
           # - os: ubuntu-latest
-          #   target: wasm32-unknown-emscripten
-          #   args: --out dist --interpreter 3.14
           #   manylinux: ""
+          #   target: wasm32-unknown-emscripten
+          #   args: --out dist
+          #   interpreter: ""
+          #   abi3t: false
           #   envs:
           #     # https://pyodide.org/en/stable/development/abi.html
           #     EMSCRIPTEN_VERSION: "5.0.3"
           #     PYODIDE_PYTHON_VERSION: "3.14"
           #     PYODIDE_ABI_VERSION: "2026_0"
           - os: ubuntu-latest
+            manylinux: ""
             target: x86_64-linux-android
             args: --out dist
-            manylinux: ""
+            interpreter: ""
+            abi3t: false
           - os: ubuntu-latest
+            manylinux: ""
             target: aarch64-linux-android
             args: --out dist
-            manylinux: ""
+            interpreter: ""
+            abi3t: false
 
     defaults:
       run:
@@ -115,7 +141,15 @@ jobs:
         with:
           manylinux: ${{ matrix.manylinux }}
           target: ${{ matrix.target }}
-          args: ${{ matrix.args }}
+          args: ${{ matrix.args }} ${{ matrix.interpreter }}
+
+      - name: Build wheel (abi3t)
+        uses: PyO3/maturin-action@v1
+        if: ${{ matrix.abi3t }}
+        with:
+          manylinux: ${{ matrix.manylinux }}
+          target: ${{ matrix.target }}
+          args: ${{ matrix.args }} --features abi3t -i 3.15t
 
       - name: abi3audit
         run: pipx run abi3audit --report dist/*.whl | jq
@@ -124,7 +158,7 @@ jobs:
         run: |
           "## ${{ matrix.target }}\n\n" | save -a $env.GITHUB_STEP_SUMMARY
           "| name | size |\n| --- | --- |\n" | save -a $env.GITHUB_STEP_SUMMARY
-          ls dist | each { |row| $"| ($row.name | path basename) | ($row.size)" | save -a $env.GITHUB_STEP_SUMMARY }
+          ls dist | each { |row| $"| ($row.name | path basename) | ($row.size) |\n" | save -a $env.GITHUB_STEP_SUMMARY }
 
       - uses: actions/upload-artifact@v7
         with:
