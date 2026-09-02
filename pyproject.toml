@@ -20,7 +20,7 @@ test = ["hypothesis[pytest]", "pytest-pretty", "json-five", "deepdiff"]
 dev = ["nox"]
 
 [build-system]
-requires = ["maturin>=1.14,<2.0"]
+requires = ["maturin>=1.15,<2.0"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -34,7 +34,7 @@ profile = "release"
 python-source = "python"
 
 [tool.ruff.lint]
-select = [
+extend-select = [
   "A",
   "B",
   "C4",

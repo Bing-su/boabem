@@ -26,56 +26,55 @@ jobs:
           - os: ubuntu-latest
             manylinux: auto
             target: x86_64-unknown-linux-gnu
-            args: --out dist --zig --interpreter 3.10 3.14t pypy3.11 graalpy3.12
+            args: --out dist --zig --interpreter 3.10 3.14t 3.15t pypy3.11 graalpy3.12
           - os: ubuntu-24.04-arm
             manylinux: auto
             target: aarch64-unknown-linux-gnu
-            args: --out dist --zig --interpreter 3.10 3.14t pypy3.11 graalpy3.12
+            args: --out dist --zig --interpreter 3.10 3.14t 3.15t pypy3.11 graalpy3.12
           - os: ubuntu-latest
             manylinux: auto
             target: riscv64gc-unknown-linux-gnu
-            args: --out dist --zig --interpreter 3.10 3.14t
+            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
 
           # Linux - musllinux
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: x86_64-unknown-linux-musl
-            args: --out dist --zig --interpreter 3.10 3.14t
-          - os: ubuntu-24.04-arm
+            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
+          - os: ubuntu-26.04-arm
             manylinux: musllinux_1_2
             target: aarch64-unknown-linux-musl
-            args: --out dist --zig --interpreter 3.10 3.14t
+            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: riscv64gc-unknown-linux-musl
-            args: --out dist --zig --interpreter 3.10 3.14t
+            args: --out dist --zig --interpreter 3.10 3.14t 3.15t
 
           # macOS
           - os: macos-latest
             manylinux: auto
             target: x86_64-apple-darwin
-            args: --out dist --interpreter 3.10 3.14t
+            args: --out dist --interpreter 3.10 3.14t 3.15t
           - os: macos-latest
             manylinux: auto
             target: aarch64-apple-darwin
-            args: --out dist --interpreter 3.10 3.14t pypy3.11 graalpy3.12
+            args: --out dist --interpreter 3.10 3.14t 3.15t pypy3.11 graalpy3.12
 
           # Windows
           - os: windows-latest
             manylinux: auto
             target: x86_64-pc-windows-msvc
-            args: --out dist --interpreter 3.10 3.14t pypy3.11
-            interpreter: 3.10 3.14t pypy3.11
+            args: --out dist --interpreter 3.10 3.14t 3.15t pypy3.11
           - os: windows-11-arm
             manylinux: auto
             target: aarch64-pc-windows-msvc
-            args: --out dist --interpreter 3.10 3.14t
+            args: --out dist --interpreter 3.10 3.14t 3.15t
 
           # etc
-          - os: ubuntu-latest
-            target: wasm32-unknown-emscripten
-            args: --out dist --interpreter 3.14
-            manylinux: ""
+          # - os: ubuntu-latest
+          #   target: wasm32-unknown-emscripten
+          #   args: --out dist --interpreter 3.14
+          #   manylinux: ""
           - os: ubuntu-latest
             target: x86_64-linux-android
             args: --out dist
