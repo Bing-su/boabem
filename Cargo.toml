@@ -33,6 +33,10 @@ num-traits = "0.2"
 pyo3 = { version = "0.29", features = ["num-bigint"] }
 reqwest = "0.13"
 
+[features]
+abi3 = ["pyo3/abi3-py310"]
+abi3t = ["pyo3/abi3t-py315"]
+
 [profile.release]
 split-debuginfo = "packed"
 strip = true
