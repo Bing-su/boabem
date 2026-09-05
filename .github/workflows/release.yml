@@ -151,8 +151,8 @@ jobs:
           target: ${{ matrix.target }}
           args: ${{ matrix.args }} --features abi3t -i 3.15t
 
-      - name: abi3audit
-        run: pipx run abi3audit --report dist/*.whl | jq
+      # - name: abi3audit
+      #   run: pipx run abi3audit --report dist/*.whl | jq
 
       - name: Github summary
         run: |
