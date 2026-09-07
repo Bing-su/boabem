@@ -86,17 +86,25 @@ jobs:
             abi3t: true
 
           # etc
-          # - os: ubuntu-latest
-          #   manylinux: ""
-          #   target: wasm32-unknown-emscripten
-          #   args: --out dist
-          #   interpreter: ""
-          #   abi3t: false
-          #   envs:
-          #     # https://pyodide.org/en/stable/development/abi.html
-          #     EMSCRIPTEN_VERSION: "5.0.3"
-          #     PYODIDE_PYTHON_VERSION: "3.14"
-          #     PYODIDE_ABI_VERSION: "2026_0"
+          - os: ubuntu-latest
+            manylinux: ""
+            target: wasm32-unknown-emscripten
+            args: --out dist
+            interpreter: -i 3.14
+            abi3t: false
+            envs:
+              # https://pyodide.org/en/stable/development/abi.html
+              EMSCRIPTEN_VERSION: "5.0.3"
+              PYODIDE_ABI_VERSION: "2026_0"
+          - os: ubuntu-latest
+            manylinux: ""
+            target: wasm32-unknown-emscripten
+            args: --out dist
+            interpreter: -i 3.15
+            abi3t: false
+            envs:
+              EMSCRIPTEN_VERSION: "6.0.5"
+              PYODIDE_ABI_VERSION: "2026_5"
           - os: ubuntu-latest
             manylinux: ""
             target: x86_64-linux-android
@@ -132,7 +140,7 @@ jobs:
           VARS: ${{ toJson(matrix.envs) }}
 
       - uses: emscripten-core/setup-emsdk@v16
-        if: ${{ startsWith(matrix.target, 'wasm') }}
+        if: ${{ contains(matrix.target, 'emscripten') }}
         with:
           version: ${{ env.EMSCRIPTEN_VERSION }}
 

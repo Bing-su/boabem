@@ -26,7 +26,7 @@ build-backend = "maturin"
 [tool.maturin]
 auditwheel = "repair"
 features = [
-  { feature = "abi3", python-version = ">=3.10" },
+  { feature = "pyo3/abi3-py310", python-version = ">=3.10" },
 ]
 profile = "release"
 python-source = "python"
