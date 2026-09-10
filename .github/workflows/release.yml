@@ -85,23 +85,23 @@ jobs:
             interpreter: -i 3.10 3.14t
             abi3t: true
 
-          # etc
-          - os: ubuntu-latest
-            manylinux: ""
-            target: wasm32-unknown-emscripten
-            args: --out dist
-            interpreter: -i 3.14
-            abi3t: false
-            envs:
-              # https://pyodide.org/en/stable/development/abi.html
-              EMSCRIPTEN_VERSION: "5.0.3"
-              PYODIDE_ABI_VERSION: "2026_0"
-          - os: ubuntu-latest
-            manylinux: ""
-            target: wasm32-unknown-emscripten
-            args: --out dist
-            interpreter: -i 3.15
-            abi3t: false
+            # etc
+            # - os: ubuntu-latest
+            #   manylinux: ""
+            #   target: wasm32-unknown-emscripten
+            #   args: --out dist
+            #   interpreter: -i 3.14
+            #   abi3t: false
+            #   envs:
+            #     # https://pyodide.org/en/stable/development/abi.html
+            #     EMSCRIPTEN_VERSION: "5.0.3"
+            #     PYODIDE_ABI_VERSION: "2026_0"
+            # - os: ubuntu-latest
+            #   manylinux: ""
+            #   target: wasm32-unknown-emscripten
+            #   args: --out dist
+            #   interpreter: -i 3.15
+            #   abi3t: false
             envs:
               EMSCRIPTEN_VERSION: "6.0.5"
               PYODIDE_ABI_VERSION: "2026_5"
