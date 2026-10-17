@@ -46,8 +46,10 @@ pub struct PyContext {
 #[pymethods]
 impl PyContext {
     #[new]
-    fn new() -> Self {
-        let mut context = Context::default();
+    fn new() -> PyResult<Self> {
+        let mut context = Context::builder()
+            .build()
+            .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
         boa_runtime::register(
             (
                 boa_runtime::extensions::ConsoleExtension::default(),
@@ -58,9 +60,9 @@ impl PyContext {
             None,
             &mut context,
         )
-        .expect("should not fail while registering the runtime");
+        .map_err(|e| PyRuntimeError::new_err(e.to_string()))?;
 
-        Self { context }
+        Ok(Self { context })
     }
 
     pub fn eval(&mut self, source: &str) -> PyResult<Py<PyAny>> {
