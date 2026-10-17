@@ -36,10 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      - uses: astral-sh/setup-uv@v10.0.1
-      - uses: mozilla-actions/sccache-action@v0.0.11
+      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: jdx/mr-boxington-action@v1
       - name: Run tests
         run: uvx nox -s test
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"

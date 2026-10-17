@@ -157,7 +157,7 @@ jobs:
         with:
           manylinux: ${{ matrix.manylinux }}
           target: ${{ matrix.target }}
-          args: ${{ matrix.args }} --features abi3t -i 3.15t
+          args: ${{ matrix.args }} --features pyo3/abi3t-py315 -i 3.15t
 
       # - name: abi3audit
       #   run: pipx run abi3audit --report dist/*.whl | jq
@@ -183,7 +183,7 @@ jobs:
       - uses: hustcer/setup-nu@v3
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      - uses: astral-sh/setup-uv@v10.0.1
+      - uses: astral-sh/setup-uv@v10.3.0
 
       - name: Build sdist
         run: uv build --sdist

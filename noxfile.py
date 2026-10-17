@@ -1,7 +1,7 @@
 import nox
 
 
-@nox.session(python=["3.10", "3.14", "3.14t", "pypy3.11"], venv_backend="uv")
+@nox.session(python=["3.11", "3.15", "3.15t", "pypy3.12"], venv_backend="uv")
 def test(session: nox.Session) -> None:
     session.install(".[test]")
     session.run("pytest")
