@@ -76,7 +76,7 @@ jobs:
             manylinux: auto
             target: x86_64-pc-windows-msvc
             args: --out dist
-            interpreter: -i 3.11 3.14t pypy3.11 pypy3.12 graalpy3.12 graalpy3.13
+            interpreter: -i 3.11 3.14t pypy3.11 pypy3.12
             abi3t: true
           - os: windows-11-arm
             manylinux: auto
