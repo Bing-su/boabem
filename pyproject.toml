@@ -14,7 +14,13 @@ dynamic = ["description", "license", "version"]
 source = "https://github.com/Bing-su/boabem"
 
 [project.optional-dependencies]
-test = ["hypothesis[pytest]", "pytest-pretty", "json-five", "deepdiff"]
+test = [
+  "hypothesis[pytest]",
+  "pytest-pretty",
+  "pytest-httpserver>=1.1.5",
+  "json-five",
+  "deepdiff",
+]
 
 [dependency-groups]
 dev = ["nox"]

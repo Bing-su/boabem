@@ -453,14 +453,6 @@ def test_url_static_methods():
     )
 
 
-def test_fetch_basic():
-    ctx = Context()
-    ctx.eval("fetch_result = fetch('https://example.com')")
-    result = ctx.eval("fetch_result")
-    assert result is not None
-    assert ctx.eval("fetch_result instanceof Promise") is True
-
-
 def test_regexp_basic():
     ctx = Context()
     ctx.eval("regexp = /\\d+/g")
