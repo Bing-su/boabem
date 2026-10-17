@@ -22,19 +22,19 @@ jobs:
             manylinux: auto
             target: x86_64-unknown-linux-gnu
             args: --out dist --zig
-            interpreter: -i 3.10 3.14t pypy3.11 graalpy3.12
+            interpreter: -i 3.11 3.14t pypy3.11 pypy3.12 graalpy3.12 graalpy3.13
             abi3t: true
           - os: ubuntu-24.04-arm
             manylinux: auto
             target: aarch64-unknown-linux-gnu
             args: --out dist --zig
-            interpreter: -i 3.10 3.14t pypy3.11 graalpy3.12
+            interpreter: -i 3.11 3.14t pypy3.11 pypy3.12 graalpy3.12 graalpy3.13
             abi3t: true
           - os: ubuntu-latest
             manylinux: auto
             target: riscv64gc-unknown-linux-gnu
             args: --out dist --zig
-            interpreter: -i 3.10 3.14t
+            interpreter: -i 3.11 3.14t
             abi3t: true
 
           # Linux - musllinux
@@ -42,19 +42,19 @@ jobs:
             manylinux: musllinux_1_2
             target: x86_64-unknown-linux-musl
             args: --out dist --zig
-            interpreter: -i 3.10 3.14t
+            interpreter: -i 3.11 3.14t
             abi3t: true
           - os: ubuntu-26.04-arm
             manylinux: musllinux_1_2
             target: aarch64-unknown-linux-musl
             args: --out dist --zig
-            interpreter: -i 3.10 3.14t
+            interpreter: -i 3.11 3.14t
             abi3t: true
           - os: ubuntu-latest
             manylinux: musllinux_1_2
             target: riscv64gc-unknown-linux-musl
             args: --out dist --zig
-            interpreter: -i 3.10 3.14t
+            interpreter: -i 3.11 3.14t
             abi3t: true
 
           # macOS
@@ -62,13 +62,13 @@ jobs:
             manylinux: auto
             target: x86_64-apple-darwin
             args: --out dist
-            interpreter: -i 3.10 3.14t
+            interpreter: -i 3.11 3.14t
             abi3t: true
           - os: macos-latest
             manylinux: auto
             target: aarch64-apple-darwin
             args: --out dist
-            interpreter: -i 3.10 3.14t pypy3.11 graalpy3.12
+            interpreter: -i 3.11 3.14t pypy3.11 pypy3.12 graalpy3.12 graalpy3.13
             abi3t: true
 
           # Windows
@@ -76,35 +76,35 @@ jobs:
             manylinux: auto
             target: x86_64-pc-windows-msvc
             args: --out dist
-            interpreter: -i 3.10 3.14t pypy3.11
+            interpreter: -i 3.11 3.14t pypy3.11 pypy3.12 graalpy3.12 graalpy3.13
             abi3t: true
           - os: windows-11-arm
             manylinux: auto
             target: aarch64-pc-windows-msvc
             args: --out dist
-            interpreter: -i 3.10 3.14t
+            interpreter: -i 3.11 3.14t
             abi3t: true
 
-            # etc
-            # - os: ubuntu-latest
-            #   manylinux: ""
-            #   target: wasm32-unknown-emscripten
-            #   args: --out dist
-            #   interpreter: -i 3.14
-            #   abi3t: false
-            #   envs:
-            #     # https://pyodide.org/en/stable/development/abi.html
-            #     EMSCRIPTEN_VERSION: "5.0.3"
-            #     PYODIDE_ABI_VERSION: "2026_0"
-            # - os: ubuntu-latest
-            #   manylinux: ""
-            #   target: wasm32-unknown-emscripten
-            #   args: --out dist
-            #   interpreter: -i 3.15
-            #   abi3t: false
-            envs:
-              EMSCRIPTEN_VERSION: "6.0.5"
-              PYODIDE_ABI_VERSION: "2026_5"
+          #   # etc
+          # - os: ubuntu-latest
+          #   manylinux: ""
+          #   target: wasm32-unknown-emscripten
+          #   args: --out dist
+          #   interpreter: -i 3.14
+          #   abi3t: false
+          #   envs:
+          #     # https://pyodide.org/en/stable/development/abi.html
+          #     EMSCRIPTEN_VERSION: "5.0.3"
+          #     PYODIDE_ABI_VERSION: "2026_0"
+          # - os: ubuntu-latest
+          #   manylinux: ""
+          #   target: wasm32-unknown-emscripten
+          #   args: --out dist
+          #   interpreter: -i 3.15
+          #   abi3t: false
+          #   envs:
+          #     EMSCRIPTEN_VERSION: "6.0.5"
+          #     PYODIDE_ABI_VERSION: "2026_5"
           - os: ubuntu-latest
             manylinux: ""
             target: x86_64-linux-android
@@ -132,17 +132,17 @@ jobs:
         with:
           target: ${{ matrix.target }}
 
-      - name: Set environment variables
-        if: ${{ matrix.envs }}
-        run: |
-          $env.VARS | from json | items { |key, value| $"($key)=($value)\n" | save -a $env.GITHUB_ENV }
-        env:
-          VARS: ${{ toJson(matrix.envs) }}
+      # - name: Set environment variables
+      #   if: ${{ matrix.envs }}
+      #   run: |
+      #     $env.VARS | from json | items { |key, value| $"($key)=($value)\n" | save -a $env.GITHUB_ENV }
+      #   env:
+      #     VARS: ${{ toJson(matrix.envs) }}
 
-      - uses: emscripten-core/setup-emsdk@v16
-        if: ${{ contains(matrix.target, 'emscripten') }}
-        with:
-          version: ${{ env.EMSCRIPTEN_VERSION }}
+      # - uses: emscripten-core/setup-emsdk@v16
+      #   if: ${{ contains(matrix.target, 'emscripten') }}
+      #   with:
+      #     version: ${{ env.EMSCRIPTEN_VERSION }}
 
       - name: Build wheel
         uses: PyO3/maturin-action@v1
