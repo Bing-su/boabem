@@ -1,7 +1,10 @@
+from collections.abc import Callable
+from typing import Any
+
 import pytest
 
 
-def test_promise_jobs_run_before_eval_returns(evaluate):
+def test_promise_jobs_run_before_eval_returns(evaluate: Callable[[str], Any]):
     source = """
         globalThis.result = 0;
         Promise.resolve(42).then(value => {
@@ -24,7 +27,9 @@ def test_promise_jobs_run_before_eval_returns(evaluate):
         pytest.param("({a: Promise.resolve(42)})", {"a": 42}, id="nested-promise"),
     ],
 )
-def test_fulfilled_promise_returns_python_value(evaluate, source, expected):
+def test_fulfilled_promise_returns_python_value(
+    evaluate: Callable[[str], Any], source: str, expected: Any
+):
     assert evaluate(source) == expected
 
 
@@ -73,7 +78,9 @@ def test_fulfilled_promise_returns_python_value(evaluate, source, expected):
         ),
     ],
 )
-def test_promise_rejection_raises_and_context_recovers(evaluate, source):
+def test_promise_rejection_raises_and_context_recovers(
+    evaluate: Callable[[str], Any], source: str
+):
     with pytest.raises(RuntimeError, match="boom"):
         evaluate(source)
 
@@ -101,11 +108,13 @@ def test_promise_rejection_raises_and_context_recovers(evaluate, source):
         ),
     ],
 )
-def test_handled_rejection_is_not_reported(evaluate, source):
+def test_handled_rejection_is_not_reported(evaluate: Callable[[str], Any], source: str):
     assert evaluate(source) == 42
 
 
-def test_pending_promise_can_be_resolved_in_later_eval(evaluate):
+def test_pending_promise_can_be_resolved_in_later_eval(
+    evaluate: Callable[[str], Any],
+):
     source = """
         let resolvePromise;
         const pending = new Promise(resolve => {
@@ -120,7 +129,7 @@ def test_pending_promise_can_be_resolved_in_later_eval(evaluate):
     assert evaluate("resolvePromise(42); pending") == 42
 
 
-def test_throw_drains_jobs_and_rejections(evaluate):
+def test_throw_drains_jobs_and_rejections(evaluate: Callable[[str], Any]):
     source = """
         globalThis.result = 0;
         Promise.resolve().then(() => {
@@ -146,7 +155,9 @@ def test_throw_drains_jobs_and_rejections(evaluate):
         ),
     ],
 )
-def test_conversion_error_clears_rejections(evaluate, value, message):
+def test_conversion_error_clears_rejections(
+    evaluate: Callable[[str], Any], value: str, message: str
+):
     source = f"Promise.reject(new Error('discarded')); {value};"
 
     with pytest.raises(RuntimeError, match=message):
@@ -155,7 +166,9 @@ def test_conversion_error_clears_rejections(evaluate, value, message):
     assert evaluate("1 + 1") == 2
 
 
-def test_throwing_getter_drains_jobs_and_rejections(evaluate):
+def test_throwing_getter_drains_jobs_and_rejections(
+    evaluate: Callable[[str], Any],
+):
     source = """
         globalThis.result = 0;
         ({
@@ -176,7 +189,9 @@ def test_throwing_getter_drains_jobs_and_rejections(evaluate):
     assert evaluate("1 + 1") == 2
 
 
-def test_getter_rejection_is_reported_in_same_eval(evaluate):
+def test_getter_rejection_is_reported_in_same_eval(
+    evaluate: Callable[[str], Any],
+):
     source = """
         ({
             get value() {
@@ -192,7 +207,7 @@ def test_getter_rejection_is_reported_in_same_eval(evaluate):
     assert evaluate("1 + 1") == 2
 
 
-def test_getter_jobs_run_before_returning(evaluate):
+def test_getter_jobs_run_before_returning(evaluate: Callable[[str], Any]):
     source = """
         globalThis.result = 0;
         ({
@@ -209,7 +224,7 @@ def test_getter_jobs_run_before_returning(evaluate):
     assert evaluate("result") == 42
 
 
-def test_promise_created_by_getter_is_resolved(evaluate):
+def test_promise_created_by_getter_is_resolved(evaluate: Callable[[str], Any]):
     source = """
         ({
             get value() {
@@ -229,7 +244,9 @@ def test_promise_created_by_getter_is_resolved(evaluate):
         pytest.param("'escape\\", id="escape-sequence"),
     ],
 )
-def test_unexpected_eof_raises_without_poisoning_context(evaluate, source):
+def test_unexpected_eof_raises_without_poisoning_context(
+    evaluate: Callable[[str], Any], source: str
+):
     with pytest.raises(RuntimeError):
         evaluate(source)
 

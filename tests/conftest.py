@@ -12,7 +12,7 @@ from werkzeug import Request, Response
 
 from boabem import Context
 
-EVALUATION_METHODS = ("eval", "eval_from_bytes", "eval_from_filepath")
+EVALUATION_METHODS = ("eval_from_bytes", "eval_from_filepath")
 
 
 def _evaluate_source(ctx: Context, method: str, path: Path, source: str) -> Any:

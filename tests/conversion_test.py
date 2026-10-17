@@ -11,7 +11,7 @@ from hypothesis import strategies as st
 from boabem import Context, Undefined
 
 
-def json(*, finite_only: bool = True):
+def json(*, finite_only: bool = True) -> st.SearchStrategy[Any]:
     """Helper function to describe JSON objects, with optional inf and nan."""
     numbers = st.floats(allow_infinity=not finite_only, allow_nan=not finite_only)
     return st.recursive(
@@ -20,11 +20,11 @@ def json(*, finite_only: bool = True):
     )
 
 
-def json_array(*, finite_only: bool = True):
+def json_array(*, finite_only: bool = True) -> st.SearchStrategy[list[Any]]:
     return st.lists(json(finite_only=finite_only))
 
 
-def json_object(*, finite_only: bool = True):
+def json_object(*, finite_only: bool = True) -> st.SearchStrategy[dict[str, Any]]:
     return st.dictionaries(st.text(), json(finite_only=finite_only))
 
 

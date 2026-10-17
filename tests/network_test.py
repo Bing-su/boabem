@@ -1,7 +1,11 @@
+from collections.abc import Callable
+from typing import Any
+
 import pytest
+from pytest_httpserver import HTTPServer
 
 
-def test_fetch_basic(network_evaluate, httpserver):
+def test_fetch_basic(network_evaluate: Callable[[str], Any], httpserver: HTTPServer):
     httpserver.expect_oneshot_request("/", method="GET").respond_with_data("ok")
     url = httpserver.url_for("/")
     source = f"""
@@ -33,7 +37,11 @@ def test_fetch_basic(network_evaluate, httpserver):
         ),
     ],
 )
-def test_fetch_eof_rejection_raises(network_evaluate, raw_http_response, response):
+def test_fetch_eof_rejection_raises(
+    network_evaluate: Callable[[str], Any],
+    raw_http_response: Callable[[bytes], str],
+    response: bytes,
+):
     url = raw_http_response(response)
     source = f"""
         fetch('{url}');
@@ -44,7 +52,9 @@ def test_fetch_eof_rejection_raises(network_evaluate, raw_http_response, respons
         network_evaluate(source)
 
 
-def test_fetch_error_can_be_caught(network_evaluate, raw_http_response):
+def test_fetch_error_can_be_caught(
+    network_evaluate: Callable[[str], Any], raw_http_response: Callable[[bytes], str]
+):
     url = raw_http_response(b"HTTP/1.1 200 OK\r\nContent-Length:")
     source = f"fetch('{url}').catch(() => 'handled')"
 

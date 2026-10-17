@@ -40,6 +40,7 @@ python-source = "python"
 [tool.ruff.lint]
 extend-select = [
   "A",
+  "ANN001",
   "B",
   "C4",
   "C90",
