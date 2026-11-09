@@ -84,9 +84,10 @@ from boabem import Context
 
 ctx = Context()
 assert ctx.eval("new Intl.NumberFormat('en-US').format(1234)") == "1,234"
-assert ctx.eval(
-    "Temporal.PlainDate.from('2024-02-29').add({days: 1}).toString()"
-) == "2024-03-01"
+assert (
+    ctx.eval("Temporal.PlainDate.from('2024-02-29').add({days: 1}).toString()")
+    == "2024-03-01"
+)
 assert ctx.eval(r"/(?<=price=)\d+/.exec('price=42;')[0]") == "42"
 ```
 
